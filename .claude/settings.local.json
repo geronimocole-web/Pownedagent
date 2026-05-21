@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//mnt/c/Users/geron/AppData/Local/Packages/Claude_pzs8sxrjxfjjc/LocalCache/Roaming/Claude/local-agent-mode-sessions/4c143f5f-afa1-42cd-a3ec-ce3aba4dc06d/821bd79c-b362-49b5-93eb-543cc4244858/local_f83b4aba-bbe1-4109-8c57-8dec30136f3c/outputs/powned-agent/**)",
+      "Bash(git -C \"/mnt/c/Users/geron/AppData/Local/Packages/Claude_pzs8sxrjxfjjc/LocalCache/Roaming/Claude/local-agent-mode-sessions/4c143f5f-afa1-42cd-a3ec-ce3aba4dc06d/821bd79c-b362-49b5-93eb-543cc4244858/local_f83b4aba-bbe1-4109-8c57-8dec30136f3c/outputs/powned-agent\" log --oneline -10)",
+      "PowerShell(npm --version)",
+      "PowerShell(node --version)",
+      "PowerShell(@\\(\"C:\\\\Program Files\\\\nodejs\\\\node.exe\", \"C:\\\\Program Files \\(x86\\)\\\\nodejs\\\\node.exe\", \"$env:APPDATA\\\\npm\\\\node.exe\", \"$env:ProgramFiles\\\\nodejs\\\\node.exe\"\\) | Where-Object { Test-Path $_ } | Select-Object -First 1)"
+    ]
+  }
+}

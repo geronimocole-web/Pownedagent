@@ -1,0 +1,13 @@
+{
+  "name": "@powned/database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./client.ts",
+  "exports": {
+    ".": "./client.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.4"
+  }
+}
