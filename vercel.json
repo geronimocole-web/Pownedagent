@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd packages/dashboard && pnpm build",
+  "buildCommand": "npx pnpm@11 --filter dashboard build",
   "outputDirectory": "packages/dashboard/.next",
-  "installCommand": "pnpm install",
+  "installCommand": "npx pnpm@11 install --ignore-scripts",
   "framework": "nextjs",
   "crons": [
     {
