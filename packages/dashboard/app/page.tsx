@@ -144,6 +144,24 @@ export default function HomePage() {
           >
             {scraping ? '⏳ Bezig...' : '↻ Ververs'}
           </button>
+          <button
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' })
+              window.location.href = '/login'
+            }}
+            title="Uitloggen"
+            style={{
+              background: 'none',
+              border: '1px solid var(--powned-border)',
+              color: 'var(--powned-muted)',
+              padding: '7px 10px',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: 14,
+            }}
+          >
+            ⎋
+          </button>
         </div>
       </header>
 

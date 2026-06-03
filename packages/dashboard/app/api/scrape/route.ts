@@ -1,23 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { IS_DEMO_MODE, MOCK_ITEMS } from '../../../lib/mock-data'
 
 export async function POST(request: NextRequest) {
-  // Demo mode: simuleer een scrape zonder echte API-aanroepen
-  if (IS_DEMO_MODE) {
-    await new Promise(resolve => setTimeout(resolve, 1200)) // realistisch laadgevoel
-    return NextResponse.json({
-      success: true,
-      found: MOCK_ITEMS.length,
-      saved: 3,
-      scored: 3,
-      errors: 0,
-      demo: true,
-      timestamp: new Date().toISOString(),
-    })
-  }
-
-  // Productie: Bearer token vereist
+  // Bearer token vereist (Vercel cron of dashboard knop)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
