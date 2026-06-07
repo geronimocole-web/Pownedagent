@@ -3,12 +3,16 @@ import type { NextRequest } from 'next/server'
 
 const COOKIE_NAME = 'powned_session'
 
-async function verifyToken(token: string): Promise<boolean> {
+async function verifyToken(rawToken: string): Promise<boolean> {
   try {
     const secret = process.env.AUTH_SECRET ?? process.env.CRON_SECRET ?? 'powned-secret'
 
-    // base64url → string
-    const decoded = atob(token.replace(/-/g, '+').replace(/_/g, '/'))
+    // URL-decode indien browser cookie heeft URL-encoded (bijv. %3D%3D → ==)
+    const token = decodeURIComponent(rawToken)
+
+    // base64url of base64 → string (herstel padding + vervang URL-safe tekens)
+    const padded = token + '=='.slice(0, (4 - token.length % 4) % 4)
+    const decoded = atob(padded.replace(/-/g, '+').replace(/_/g, '/'))
     const lastColon = decoded.lastIndexOf(':')
     if (lastColon === -1) return false
     const payload = decoded.slice(0, lastColon)
@@ -34,11 +38,10 @@ async function verifyToken(token: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Publieke paden
+  // Publieke paden — geen auth check
   if (
     pathname.startsWith('/login') ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/scrape') ||
+    pathname.startsWith('/api/') ||   // alle API routes gaan via server, cookie wordt meegestuurd
     pathname.startsWith('/_next') ||
     pathname === '/favicon.ico'
   ) {
