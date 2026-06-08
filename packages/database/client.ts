@@ -81,27 +81,11 @@ export interface FeedItem extends NewsItem {
 // Client
 // ============================================================
 
-// Lazy initialisatie: client wordt pas aangemaakt bij eerste gebruik,
-// zodat env vars zeker beschikbaar zijn op het moment van aanroep.
-let _client: ReturnType<typeof createClient> | null = null
+// Directe initialisatie — env vars zijn beschikbaar via next.config.mjs env block
+const supabaseUrl = process.env.SUPABASE_URL ?? ''
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? ''
 
-function getClient() {
-  if (!_client) {
-    const url = process.env.SUPABASE_URL
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY
-    if (!url) throw new Error('SUPABASE_URL is niet ingesteld')
-    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is niet ingesteld')
-    _client = createClient(url, key)
-  }
-  return _client
-}
-
-// Backwards compatible export
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
-  get(_target, prop) {
-    return (getClient() as any)[prop]
-  },
-})
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // ============================================================
 // Queries
