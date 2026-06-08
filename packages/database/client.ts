@@ -81,25 +81,19 @@ export interface FeedItem extends NewsItem {
 // Client
 // ============================================================
 
-// Lazy init — aangemaakt bij eerste gebruik zodat env vars altijd beschikbaar zijn
-let _client: ReturnType<typeof createClient> | undefined
+// Placeholder voorkomt "supabaseUrl is required" tijdens build.
+// De echte waarden komen via Vercel env vars — dan overschrijft process.env de placeholder.
+const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder-key'
 
-export function getSupabase() {
-  if (!_client) {
-    const url = process.env.SUPABASE_URL ?? ''
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? ''
-    if (!url || !key) throw new Error('Supabase env vars ontbreken (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)')
-    _client = createClient(url, key)
-  }
-  return _client
-}
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // ============================================================
 // Queries
 // ============================================================
 
 export async function getActiveSources(): Promise<Source[]> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await supabase
     .from('sources')
     .select('*')
     .eq('active', true)
@@ -111,7 +105,7 @@ export async function getActiveSources(): Promise<Source[]> {
 export async function upsertNewsItem(
   item: Omit<NewsItem, 'id' | 'created_at'>
 ): Promise<NewsItem | null> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await supabase
     .from('news_items')
     .upsert(item, { onConflict: 'url', ignoreDuplicates: true })
     .select()
@@ -121,7 +115,7 @@ export async function upsertNewsItem(
 }
 
 export async function getUnscoredItems(limit = 100): Promise<NewsItem[]> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await supabase
     .from('news_items')
     .select('*, dna_scores(id)')
     .is('dna_scores.id', null)
@@ -134,7 +128,7 @@ export async function getUnscoredItems(limit = 100): Promise<NewsItem[]> {
 export async function upsertDnaScore(
   score: Omit<DnaScore, 'id' | 'scored_at'>
 ): Promise<DnaScore> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await supabase
     .from('dna_scores')
     .upsert(score, { onConflict: 'news_item_id' })
     .select()
@@ -150,7 +144,7 @@ export async function getFeedItems(opts: {
   offset?: number
 } = {}): Promise<FeedItem[]> {
   const { platform, minScore = 0, limit = 50, offset = 0 } = opts
-  let query = getSupabase()
+  let query = supabase
     .from('feed_items')
     .select('*')
     .range(offset, offset + limit - 1)
@@ -169,7 +163,7 @@ export async function getFeedItems(opts: {
 }
 
 export async function getItemById(id: string): Promise<FeedItem | null> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await supabase
     .from('feed_items')
     .select('*')
     .eq('id', id)
@@ -182,7 +176,7 @@ export async function updateInsteek(
   newsItemId: string,
   insteek: Insteek
 ): Promise<void> {
-  const { error } = await getSupabase()
+  const { error } = await supabase
     .from('dna_scores')
     .update({ insteek })
     .eq('news_item_id', newsItemId)
