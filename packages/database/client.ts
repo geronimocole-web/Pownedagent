@@ -82,16 +82,16 @@ export interface FeedItem extends NewsItem {
 // ============================================================
 
 // Lazy init — aangemaakt bij eerste gebruik zodat env vars altijd beschikbaar zijn
-let _getSupabase(): ReturnType<typeof createClient> | undefined
+let _client: ReturnType<typeof createClient> | undefined
 
 export function getSupabase() {
-  if (!_getSupabase()) {
+  if (!_client) {
     const url = process.env.SUPABASE_URL ?? ''
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? ''
     if (!url || !key) throw new Error('Supabase env vars ontbreken (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)')
-    _getSupabase() = createClient(url, key)
+    _client = createClient(url, key)
   }
-  return _getSupabase()
+  return _client
 }
 
 // ============================================================
