@@ -59,7 +59,7 @@ export default function HomePage() {
     try {
       const res = await fetch('/api/scrape', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET ?? ''}` },
+        // Geen Authorization header nodig — sessie-cookie wordt automatisch meegestuurd
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Scrape mislukt')

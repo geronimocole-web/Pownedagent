@@ -2,15 +2,15 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function POST(request: NextRequest) {
-  // Bearer token vereist (Vercel cron of dashboard knop)
+  // Toegang via Bearer token (Vercel cron) OF via sessie-cookie (dashboard knop)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
+  const sessionCookie = request.cookies.get('powned_session')?.value
 
-  if (!cronSecret) {
-    return NextResponse.json({ error: 'CRON_SECRET niet ingesteld' }, { status: 500 })
-  }
+  const hasBearerAuth = cronSecret && authHeader === `Bearer ${cronSecret}`
+  const hasSessionAuth = !!sessionCookie  // middleware heeft al geverifieerd dat de sessie geldig is
 
-  if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+  if (!hasBearerAuth && !hasSessionAuth) {
     return NextResponse.json({ error: 'Ongeautoriseerd' }, { status: 401 })
   }
 
