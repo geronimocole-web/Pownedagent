@@ -3,7 +3,10 @@ import { upsertDnaScore } from '@powned/database'
 import { POWNED_DNA_PROMPT } from './powned-dna'
 import type { NewsItem, DnaScore } from '@powned/database'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'placeholder' })
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'placeholder',
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+})
 
 interface RawScore {
   brutaal: number
@@ -38,7 +41,7 @@ export async function scoreItem(item: NewsItem): Promise<DnaScore> {
   const userMessage = `Titel: ${item.title}\n\nInhoud: ${(item.raw_content ?? '').slice(0, 500)}`
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gemini-2.0-flash',
     max_tokens: 512,
     messages: [
       { role: 'system', content: POWNED_DNA_PROMPT },

@@ -3,7 +3,10 @@ import { updateInsteek } from '@powned/database'
 import { INSTEEK_PROMPT } from './powned-dna'
 import type { NewsItem, DnaScore, Insteek } from '@powned/database'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'placeholder' })
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'placeholder',
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+})
 
 function parseJsonFromResponse(text: string): unknown {
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
@@ -41,7 +44,7 @@ PowNed DNA Score:
 Genereer een volledige redactie-insteek.`.trim()
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gemini-2.0-flash',
     max_tokens: 2048,
     messages: [
       { role: 'system', content: INSTEEK_PROMPT },
