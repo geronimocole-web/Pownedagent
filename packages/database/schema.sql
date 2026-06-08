@@ -58,7 +58,9 @@ create index if not exists dna_scores_total_score_idx on dna_scores(total_score 
 -- ============================================================
 
 -- Feed view: items met scores, gesorteerd op score
-create or replace view feed_items as
+-- security_invoker=true: RLS policies worden gerespecteerd (voorkomt Security Advisor waarschuwing)
+create or replace view feed_items
+with (security_invoker = true) as
 select
   ni.id,
   ni.title,
