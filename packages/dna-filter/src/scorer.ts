@@ -1,12 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { upsertDnaScore } from '@powned/database'
 import { POWNED_DNA_PROMPT } from './powned-dna'
 import type { NewsItem, DnaScore } from '@powned/database'
 
-function getClient() {
-  const apiKey = process.env.OPENAI_API_KEY || 'placeholder'
-  return new GoogleGenerativeAI(apiKey)
-}
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'placeholder' })
 
 interface RawScore {
   brutaal: number
@@ -36,14 +33,19 @@ function parseJsonFromResponse(text: string): unknown {
   return JSON.parse(cleaned)
 }
 
-/** Scoort één nieuwsitem via Google Gemini API */
 export async function scoreItem(item: NewsItem): Promise<DnaScore> {
-  const model = getClient().getGenerativeModel({ model: 'gemini-2.0-flash' })
+  const userMessage = `Titel: ${item.title}\n\nInhoud: ${(item.raw_content ?? '').slice(0, 500)}`
 
-  const prompt = `${POWNED_DNA_PROMPT}\n\nTitel: ${item.title}\n\nInhoud: ${(item.raw_content ?? '').slice(0, 500)}`
-  const result = await model.generateContent(prompt)
-  const text = result.response.text()
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o',
+    max_tokens: 512,
+    messages: [
+      { role: 'system', content: POWNED_DNA_PROMPT },
+      { role: 'user', content: userMessage },
+    ],
+  })
 
+  const text = response.choices[0].message.content ?? ''
   const raw = parseJsonFromResponse(text)
   const validated = validateScore(raw)
 
@@ -60,7 +62,6 @@ export async function scoreItem(item: NewsItem): Promise<DnaScore> {
   return score
 }
 
-/** Scoort een batch items */
 export async function scoreBatch(
   items: NewsItem[],
   concurrency = 5

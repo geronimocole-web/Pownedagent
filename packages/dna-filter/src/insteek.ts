@@ -1,12 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { updateInsteek } from '@powned/database'
 import { INSTEEK_PROMPT } from './powned-dna'
 import type { NewsItem, DnaScore, Insteek } from '@powned/database'
 
-function getClient() {
-  const apiKey = process.env.OPENAI_API_KEY || 'placeholder'
-  return new GoogleGenerativeAI(apiKey)
-}
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'placeholder' })
 
 function parseJsonFromResponse(text: string): unknown {
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
@@ -21,15 +18,11 @@ function validateInsteek(raw: unknown): Insteek {
   return i
 }
 
-/** Genereert een volledige redactie-insteek voor een nieuwsitem */
 export async function generateInsteek(
   item: NewsItem,
   score: DnaScore
 ): Promise<Insteek> {
-  const model = getClient().getGenerativeModel({ model: 'gemini-2.0-flash' })
-
-  const prompt = `${INSTEEK_PROMPT}
-
+  const userMessage = `
 Nieuwsitem:
 Titel: ${item.title}
 Bron: ${item.source ?? 'Onbekend'}
@@ -44,11 +37,18 @@ PowNed DNA Score:
 - Totaal: ${score.total_score}/10
 - Reden: ${score.reden ?? '-'}
 
-Genereer een volledige redactie-insteek.`
+Genereer een volledige redactie-insteek.`.trim()
 
-  const result = await model.generateContent(prompt)
-  const text = result.response.text()
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o',
+    max_tokens: 2048,
+    messages: [
+      { role: 'system', content: INSTEEK_PROMPT },
+      { role: 'user', content: userMessage },
+    ],
+  })
 
+  const text = response.choices[0].message.content ?? ''
   const raw = parseJsonFromResponse(text)
   const insteek = validateInsteek(raw)
 
