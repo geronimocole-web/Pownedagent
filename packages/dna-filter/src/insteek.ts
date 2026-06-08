@@ -3,7 +3,7 @@ import { updateInsteek } from '@powned/database'
 import { INSTEEK_PROMPT } from './powned-dna'
 import type { NewsItem, DnaScore, Insteek } from '@powned/database'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'placeholder' })
 
 function parseJsonFromResponse(text: string): unknown {
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()

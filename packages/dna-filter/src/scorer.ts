@@ -3,7 +3,7 @@ import { upsertDnaScore } from '@powned/database'
 import { POWNED_DNA_PROMPT } from './powned-dna'
 import type { NewsItem, DnaScore } from '@powned/database'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'placeholder' })
 
 interface RawScore {
   brutaal: number
